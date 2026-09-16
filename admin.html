@@ -125,4 +125,131 @@
     }
   </script>
 </body>
+</html><!DOCTYPE html>
+<html lang="it" class="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Pannello Admin - Vetrina Portfolio</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body class="bg-slate-950 text-slate-100 min-h-screen p-6">
+  <div class="max-w-4xl mx-auto space-y-8">
+    <div class="flex justify-between items-center border-b border-slate-800 pb-4">
+      <h1 class="text-2xl font-bold text-cyan-400">Pannello Admin & Gemini AI Publish</h1>
+      <a href="index.html" class="text-sm text-slate-400 hover:text-white">Torna alla Vetrina</a>
+    </div>
+
+    <!-- Credentials -->
+    <div class="bg-slate-900 p-6 rounded-2xl border border-slate-800 space-y-4">
+      <h2 class="text-lg font-bold">1. Credenziali & Token</h2>
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <input id="geminiKey" type="password" placeholder="Gemini API Key" class="bg-slate-950 border border-slate-800 p-3 rounded-xl text-sm">
+        <input id="githubToken" type="password" placeholder="GitHub Token (PAT)" class="bg-slate-950 border border-slate-800 p-3 rounded-xl text-sm">
+        <input id="githubRepo" type="text" placeholder="username/repo" class="bg-slate-950 border border-slate-800 p-3 rounded-xl text-sm">
+      </div>
+    </div>
+
+    <!-- Generator -->
+    <div class="bg-slate-900 p-6 rounded-2xl border border-slate-800 space-y-4">
+      <h2 class="text-lg font-bold">2. URL Web App</h2>
+      <input id="appUrl" type="url" placeholder="https://mia-app.example.com" class="w-full bg-slate-950 border border-slate-800 p-3 rounded-xl text-sm">
+      <button onclick="generateWithAI()" class="w-full py-3 bg-purple-600 hover:bg-purple-500 font-bold rounded-xl">Genera Scheda con IA</button>
+    </div>
+
+    <!-- Preview & Publish -->
+    <div id="previewBox" class="bg-slate-900 p-6 rounded-2xl border border-slate-800 space-y-4 hidden">
+      <h2 class="text-lg font-bold text-emerald-400">3. Anteprima & Pubblicazione</h2>
+      <div id="previewData" class="text-xs space-y-2 font-mono bg-slate-950 p-4 rounded-xl border border-slate-800"></div>
+      <button onclick="publishToGitHub()" class="w-full py-3 bg-emerald-600 hover:bg-emerald-500 font-bold rounded-xl">Pubblica su GitHub</button>
+    </div>
+
+    <div id="status" class="p-4 rounded-xl border border-slate-800 text-sm hidden"></div>
+  </div>
+
+  <script>
+    let currentApp = null;
+
+    async function generateWithAI() {
+      const url = document.getElementById('appUrl').value;
+      const apiKey = document.getElementById('geminiKey').value;
+      if (!url) return alert('Inserisci l'URL');
+
+      showStatus('Generazione scheda con Gemini AI...', 'info');
+      try {
+        const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`;
+        const prompt = `Dato l'URL ${url}, genera JSON: {"nome":"","categoria":"","tipologia":"","descrizioneBreve":"","descrizioneDettagliata":"","requisiti":"","specifichePiattaforma":""}`;
+        
+        const res = await fetch(endpoint, {
+          method: 'POST',
+          headers: {'Content-Type': 'application/json'},
+          body: JSON.stringify({ contents: [{ parts: [{ text: prompt }] }] })
+        });
+        const data = await res.json();
+        const bt = String.fromCharCode(96);
+        const text = data.candidates[0].content.parts[0].text.replace(new RegExp(bt + bt + bt + 'json', 'g'), '').replace(new RegExp(bt + bt + bt, 'g'), '').trim();
+        const parsed = JSON.parse(text);
+
+        currentApp = {
+          id: Date.now().toString(),
+          ...parsed,
+          schermate: ["https://images.unsplash.com/photo-1551288049-bebda4e38f71?auto=format&fit=crop&w=1200&q=80"],
+          linkApp: url
+        };
+
+        document.getElementById('previewData').innerText = JSON.stringify(currentApp, null, 2);
+        document.getElementById('previewBox').classList.remove('hidden');
+        showStatus('Scheda generata con successo!', 'success');
+      } catch(e) {
+        showStatus('Errore generazione: ' + e.message, 'error');
+      }
+    }
+
+    async function publishToGitHub() {
+      const repo = document.getElementById('githubRepo').value;
+      const token = document.getElementById('githubToken').value;
+      if (!repo || !token || !currentApp) return alert('Token e Repo richiesti');
+
+      showStatus('Pubblicazione su GitHub in corso...', 'info');
+      try {
+        const [owner, name] = repo.split('/');
+        const getUrl = `https://api.github.com/repos/${owner}/${name}/contents/data/apps.json`;
+        
+        const getRes = await fetch(getUrl, { headers: { Authorization: `Bearer ${token}` } });
+        let apps = [];
+        let sha = null;
+        if (getRes.ok) {
+          const fileData = await getRes.json();
+          sha = fileData.sha;
+          apps = JSON.parse(atob(fileData.content));
+        }
+
+        apps.unshift(currentApp);
+        const contentBase64 = btoa(unescape(encodeURIComponent(JSON.stringify(apps, null, 2))));
+
+        const putRes = await fetch(getUrl, {
+          method: 'PUT',
+          headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
+          body: JSON.stringify({ message: `add app ${currentApp.nome}`, content: contentBase64, sha })
+        });
+
+        if (putRes.ok) {
+          showStatus('App pubblicata! Il sito si aggiornerà su GitHub Pages entro 1 minuto.', 'success');
+        } else {
+          throw new Error('Errore durante il commit');
+        }
+      } catch(e) {
+        showStatus('Errore pubblicazione: ' + e.message, 'error');
+      }
+    }
+
+    function showStatus(msg, type) {
+      const el = document.getElementById('status');
+      el.innerText = msg;
+      el.className = `p-4 rounded-xl text-sm border ${type === 'success' ? 'bg-emerald-950 text-emerald-200 border-emerald-800' : 'bg-rose-950 text-rose-200 border-rose-800'}`;
+      el.classList.remove('hidden');
+    }
+  </script>
+</body>
 </html>
