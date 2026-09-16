@@ -144,4 +144,150 @@
     loadApps();
   </script>
 </body>
+</html><!DOCTYPE html>
+<html lang="it" class="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Vetrina Portfolio - Le mie Web App</title>
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            brand: { 500: '#06b6d4', 600: '#0891b2' }
+          }
+        }
+      }
+    }
+  </script>
+  <!-- Font & Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body class="bg-slate-950 text-slate-100 min-h-screen font-sans">
+  <div class="container mx-auto px-4 py-8 max-w-7xl">
+    <!-- Header -->
+    <header class="flex justify-between items-center mb-10 pb-6 border-b border-slate-800">
+      <div>
+        <h1 class="text-3xl font-bold bg-gradient-to-r from-cyan-400 to-blue-500 bg-clip-text text-transparent">Vetrina Web App</h1>
+        <p class="text-sm text-slate-400">Portfolio dinamico caricato da data/apps.json</p>
+      </div>
+      <a href="admin.html" class="px-4 py-2 bg-slate-800 hover:bg-slate-700 text-cyan-400 border border-slate-700 rounded-xl text-sm font-semibold transition">
+        <i class="fa-solid fa-lock mr-2"></i>Pannello Admin
+      </a>
+    </header>
+
+    <!-- Filters & Search -->
+    <div class="bg-slate-900/80 p-6 rounded-2xl border border-slate-800 mb-8 space-y-4">
+      <div class="flex flex-col md:flex-row gap-4 justify-between items-center">
+        <div class="relative w-full md:w-96">
+          <i class="fa-solid fa-search absolute left-3.5 top-3 text-slate-500"></i>
+          <input id="searchInput" type="text" placeholder="Cerca app per nome o tag..." class="w-full pl-10 pr-4 py-2 bg-slate-950 border border-slate-800 rounded-xl text-sm text-white focus:outline-none focus:border-cyan-500">
+        </div>
+        <div id="counter" class="text-xs text-slate-400">Caricamento app in corso...</div>
+      </div>
+      <div class="flex flex-wrap gap-2 pt-2 border-t border-slate-800/60" id="categoryFilters"></div>
+    </div>
+
+    <!-- Apps Grid -->
+    <div id="appsGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"></div>
+
+    <!-- Detail Modal -->
+    <div id="appModal" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+      <div class="bg-slate-900 border border-slate-800 rounded-2xl max-w-3xl w-full p-6 space-y-6 relative max-h-[90vh] overflow-y-auto">
+        <button onclick="closeModal()" class="absolute top-4 right-4 p-2 bg-slate-800 rounded-lg text-slate-400 hover:text-white"><i class="fa-solid fa-xmark"></i></button>
+        <div id="modalContent"></div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    let allApps = [];
+    let currentCategory = 'Tutte';
+
+    async function loadApps() {
+      try {
+        const res = await fetch('data/apps.json?v=' + Date.now());
+        allApps = await res.json();
+        renderFilters();
+        renderApps();
+      } catch(e) {
+        document.getElementById('appsGrid').innerHTML = '<div class="col-span-full p-8 text-center text-rose-400">Errore nel caricamento di data/apps.json</div>';
+      }
+    }
+
+    function renderFilters() {
+      const cats = ['Tutte', ...new Set(allApps.map(a => a.categoria).filter(Boolean))];
+      const container = document.getElementById('categoryFilters');
+      container.innerHTML = cats.map(c => `
+        <button onclick="filterCategory('${c}')" class="px-3 py-1 rounded-lg text-xs font-medium ${currentCategory === c ? 'bg-cyan-500 text-white' : 'bg-slate-950 text-slate-400 border border-slate-800'}">${c}</button>
+      `).join('');
+    }
+
+    function filterCategory(cat) {
+      currentCategory = cat;
+      renderFilters();
+      renderApps();
+    }
+
+    function renderApps() {
+      const search = document.getElementById('searchInput').value.toLowerCase();
+      const filtered = allApps.filter(app => {
+        const matchSearch = app.nome.toLowerCase().includes(search) || app.descrizioneBreve.toLowerCase().includes(search);
+        const matchCat = currentCategory === 'Tutte' || app.categoria === currentCategory;
+        return matchSearch && matchCat;
+      });
+
+      document.getElementById('counter').innerText = `Mostrando ${filtered.length} di ${allApps.length} app`;
+      
+      const grid = document.getElementById('appsGrid');
+      grid.innerHTML = filtered.map(app => `
+        <div class="bg-slate-900 border border-slate-800 rounded-2xl overflow-hidden hover:border-slate-700 transition flex flex-col justify-between">
+          <div>
+            <img src="${app.schermate?.[0] || 'https://via.placeholder.com/600x350'}" class="w-full h-44 object-cover">
+            <div class="p-5 space-y-2">
+              <span class="text-[10px] uppercase tracking-wider font-bold text-cyan-400 bg-cyan-950 px-2 py-0.5 rounded border border-cyan-800">${app.categoria}</span>
+              <h3 class="text-lg font-bold text-white">${app.nome}</h3>
+              <p class="text-xs text-slate-400 line-clamp-2">${app.descrizioneBreve}</p>
+            </div>
+          </div>
+          <div class="p-5 pt-0 flex gap-2">
+            <button onclick="openModal('${app.id}')" class="flex-1 py-2 bg-slate-800 hover:bg-slate-700 text-xs font-semibold rounded-xl text-slate-200">Dettagli</button>
+            <a href="${app.linkApp}" target="_blank" class="px-3 py-2 bg-cyan-950 text-cyan-400 hover:bg-cyan-900 rounded-xl text-xs flex items-center"><i class="fa-solid fa-arrow-up-right-from-square"></i></a>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    function openModal(id) {
+      const app = allApps.find(a => String(a.id) === String(id));
+      if(!app) return;
+      const modal = document.getElementById('appModal');
+      const content = document.getElementById('modalContent');
+      content.innerHTML = `
+        <div class="space-y-4">
+          <h2 class="text-2xl font-bold text-white">${app.nome}</h2>
+          <img src="${app.schermate?.[0] || ''}" class="w-full h-64 object-cover rounded-xl border border-slate-800">
+          <p class="text-sm text-slate-300">${app.descrizioneDettagliata || app.descrizioneBreve}</p>
+          <div class="grid grid-cols-2 gap-4 text-xs bg-slate-950 p-4 rounded-xl border border-slate-800">
+            <div><strong class="text-cyan-400">Requisiti:</strong> ${app.requisiti || 'Browser moderno'}</div>
+            <div><strong class="text-purple-400">Piattaforma:</strong> ${app.specifichePiattaforma || 'Web'}</div>
+          </div>
+          <a href="${app.linkApp}" target="_blank" class="block w-full py-3 text-center bg-cyan-500 hover:bg-cyan-400 text-white font-bold rounded-xl">Apri Web App</a>
+        </div>
+      `;
+      modal.classList.remove('hidden');
+    }
+
+    function closeModal() {
+      document.getElementById('appModal').classList.add('hidden');
+    }
+
+    document.getElementById('searchInput').addEventListener('input', renderApps);
+    loadApps();
+  </script>
+</body>
 </html>
