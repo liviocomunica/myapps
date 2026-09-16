@@ -1,5 +1,25 @@
 [
   {
+    "id": "1789577854956",
+    "nome": "Ais-pre-qn4w3fcatknxznpcgvic7i-565116542224.europe-west2.run.app",
+    "categoria": "Giochi di corse",
+    "tipologia": "Web App Game",
+    "descrizioneBreve": "Piattaforma web moderna ed efficiente.",
+    "descrizioneDettagliata": "Applicazione web ottimizzata per la massima produttività da qualsiasi browser moderno.",
+    "requisiti": "Browser moderno (Chrome, Firefox, Safari, Edge)",
+    "specifichePiattaforma": "Web Desktop & Mobile",
+    "schermate": [
+      "https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?auto=format&fit=crop&w=1200&q=80",
+      "https://images.unsplash.com/photo-1551288049-bebda4e38f71?auto=format&fit=crop&w=1200&q=80",
+      "https://images.unsplash.com/photo-1460925895917-afdab827c52f?auto=format&fit=crop&w=1200&q=80"
+    ],
+    "linkApp": "https://ais-pre-qn4w3fcatknxznpcgvic7i-565116542224.europe-west2.run.app/",
+    "tags": [
+      "Web",
+      "Productivity"
+    ]
+  },
+  {
     "id": "1710000001",
     "nome": "PromptCraft Studio",
     "categoria": "AI Tools",
@@ -14,7 +34,13 @@
       "https://images.unsplash.com/photo-1460925895917-afdab827c52f?auto=format&fit=crop&w=1200&q=80"
     ],
     "linkApp": "https://promptcraft-demo.example.com",
-    "tags": ["AI", "Prompt Engineering", "LLM", "Developer", "Productivity"],
+    "tags": [
+      "AI",
+      "Prompt Engineering",
+      "LLM",
+      "Developer",
+      "Productivity"
+    ],
     "dataAggiunta": "2026-03-15"
   },
   {
@@ -32,7 +58,13 @@
       "https://images.unsplash.com/photo-1542744094-3a31f272c490?auto=format&fit=crop&w=1200&q=80"
     ],
     "linkApp": "https://taskflow-matrix.example.com",
-    "tags": ["Task Manager", "Eisenhower", "Pomodoro", "Organizzazione", "Focus"],
+    "tags": [
+      "Task Manager",
+      "Eisenhower",
+      "Pomodoro",
+      "Organizzazione",
+      "Focus"
+    ],
     "dataAggiunta": "2026-03-14"
   },
   {
@@ -50,7 +82,13 @@
       "https://images.unsplash.com/photo-1517694712202-14dd9538aa97?auto=format&fit=crop&w=1200&q=80"
     ],
     "linkApp": "https://devsnippet-vault.example.com",
-    "tags": ["Snippets", "Code", "Syntax", "Developer Tools", "Cheatsheet"],
+    "tags": [
+      "Snippets",
+      "Code",
+      "Syntax",
+      "Developer Tools",
+      "Cheatsheet"
+    ],
     "dataAggiunta": "2026-03-12"
   }
 ]
