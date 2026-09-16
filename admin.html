@@ -1,362 +1,127 @@
 <!DOCTYPE html>
 <html lang="it" class="dark">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Pannello Admin - Vetrina Portfolio & AI Gemini</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Pannello Admin - Vetrina Portfolio</title>
   <script src="https://cdn.tailwindcss.com"></script>
-  <script>
-    tailwind.config = {
-      darkMode: 'class',
-      theme: {
-        extend: {
-          colors: {
-            brand: { 500: '#06b6d4', 600: '#0891b2' }
-          }
-        }
-      }
-    }
-  </script>
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
-<body class="bg-slate-950 text-slate-100 min-h-screen font-sans antialiased p-4 sm:p-8">
+<body class="bg-slate-950 text-slate-100 min-h-screen p-6">
+  <div class="max-w-4xl mx-auto space-y-8">
+    <div class="flex justify-between items-center border-b border-slate-800 pb-4">
+      <h1 class="text-2xl font-bold text-cyan-400">Pannello Admin & Gemini AI Publish</h1>
+      <a href="index.html" class="text-sm text-slate-400 hover:text-white">Torna alla Vetrina</a>
+    </div>
 
-  <div class="max-w-4xl mx-auto space-y-8 pb-16">
-    <!-- Header -->
-    <header class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 p-6 rounded-2xl bg-slate-900 border border-slate-800">
-      <div>
-        <div class="flex items-center gap-2 text-cyan-400 text-xs font-semibold uppercase tracking-wider mb-1">
-          <i class="fa-solid fa-lock"></i> Pannello Amministrazione Portfolio
-        </div>
-        <h1 class="text-2xl sm:text-3xl font-bold text-white">Generatore Schede & Commit GitHub</h1>
-      </div>
-      <a href="index.html" class="inline-flex items-center gap-2 px-4 py-2 bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 rounded-xl text-xs font-semibold transition">
-        <i class="fa-solid fa-arrow-left"></i> Torna alla Vetrina
-      </a>
-    </header>
-
-    <!-- Global Alert Banner -->
-    <div id="statusAlert" class="hidden p-4 rounded-xl border text-sm leading-relaxed transition-all"></div>
-
-    <!-- Credenziali -->
-    <div class="p-6 rounded-2xl bg-slate-900 border border-slate-800 space-y-4">
-      <div class="flex items-center justify-between border-b border-slate-800 pb-3">
-        <h2 class="text-lg font-bold text-slate-100 flex items-center gap-2">
-          <i class="fa-solid fa-key text-cyan-400"></i> 1. Credenziali & Token API
-        </h2>
-        <span class="text-xs text-slate-400">Salvate in LocalStorage</span>
-      </div>
-
+    <!-- Credentials -->
+    <div class="bg-slate-900 p-6 rounded-2xl border border-slate-800 space-y-4">
+      <h2 class="text-lg font-bold">1. Credenziali & Token</h2>
       <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <div>
-          <label class="block text-xs font-semibold text-slate-300 mb-1">
-            Gemini API Key <a href="https://aistudio.google.com/app/apikey" target="_blank" class="text-cyan-400 underline hover:text-cyan-300">(Ottieni Key)</a>
-          </label>
-          <input id="geminiApiKey" type="password" placeholder="AIzaSy..." class="w-full px-3.5 py-2.5 bg-slate-950 border border-slate-800 rounded-xl text-sm font-mono text-slate-100 focus:outline-none focus:border-cyan-500" />
-        </div>
-
-        <div>
-          <label class="block text-xs font-semibold text-slate-300 mb-1">
-            GitHub Token (PAT) <a href="https://github.com/settings/tokens" target="_blank" class="text-cyan-400 underline hover:text-cyan-300">(Crea Token)</a>
-          </label>
-          <input id="githubToken" type="password" placeholder="ghp_..." class="w-full px-3.5 py-2.5 bg-slate-950 border border-slate-800 rounded-xl text-sm font-mono text-slate-100 focus:outline-none focus:border-cyan-500" />
-        </div>
-
-        <div>
-          <label class="block text-xs font-semibold text-slate-300 mb-1">Nome Utente / Repo GitHub</label>
-          <input id="githubRepo" type="text" placeholder="tuonome/tuo-repo" class="w-full px-3.5 py-2.5 bg-slate-950 border border-slate-800 rounded-xl text-sm font-mono text-slate-100 focus:outline-none focus:border-cyan-500" />
-        </div>
-      </div>
-
-      <div class="flex items-center gap-2 pt-2">
-        <input type="checkbox" id="saveCreds" checked class="rounded bg-slate-950 border-slate-800 text-cyan-500" />
-        <label for="saveCreds" class="text-xs text-slate-400 cursor-pointer">Salva credenziali nel localStorage del browser</label>
+        <input id="geminiKey" type="password" placeholder="Gemini API Key" class="bg-slate-950 border border-slate-800 p-3 rounded-xl text-sm">
+        <input id="githubToken" type="password" placeholder="GitHub Token (PAT)" class="bg-slate-950 border border-slate-800 p-3 rounded-xl text-sm">
+        <input id="githubRepo" type="text" placeholder="username/repo" class="bg-slate-950 border border-slate-800 p-3 rounded-xl text-sm">
       </div>
     </div>
 
-    <!-- Generazione Scheda IA -->
-    <form id="aiForm" class="p-6 rounded-2xl bg-slate-900 border border-slate-800 space-y-4">
-      <div class="border-b border-slate-800 pb-3">
-        <h2 class="text-lg font-bold text-slate-100 flex items-center gap-2">
-          <i class="fa-solid fa-wand-magic-sparkles text-purple-400"></i> 2. Inserimento Web App & Generatore Gemini IA
-        </h2>
-      </div>
-
-      <div class="space-y-4">
-        <div>
-          <label class="block text-xs font-semibold text-slate-300 mb-1">URL della Web App *</label>
-          <input id="appUrl" type="url" required placeholder="https://mia-app.example.com" class="w-full px-4 py-3 bg-slate-950 border border-slate-800 rounded-xl text-sm font-mono text-slate-100 focus:outline-none focus:border-purple-500" />
-        </div>
-
-        <div>
-          <label class="block text-xs font-semibold text-slate-300 mb-1">Note / Contesto Aggiuntivo (Opzionale)</label>
-          <input id="extraContext" type="text" placeholder="es. Piattaforma per ingegneria di prompt con IA per sviluppatori" class="w-full px-3.5 py-2.5 bg-slate-950 border border-slate-800 rounded-xl text-xs text-slate-100 focus:outline-none focus:border-purple-500" />
-        </div>
-
-        <div class="space-y-2">
-          <label class="block text-xs font-semibold text-slate-300">Link Schermate (Opzionali - default se vuoti)</label>
-          <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
-            <input id="screen1" type="url" placeholder="https://.../schermata1.jpg" class="px-3 py-2 bg-slate-950 border border-slate-800 rounded-lg text-xs text-slate-200" />
-            <input id="screen2" type="url" placeholder="https://.../schermata2.jpg" class="px-3 py-2 bg-slate-950 border border-slate-800 rounded-lg text-xs text-slate-200" />
-            <input id="screen3" type="url" placeholder="https://.../schermata3.jpg" class="px-3 py-2 bg-slate-950 border border-slate-800 rounded-lg text-xs text-slate-200" />
-          </div>
-        </div>
-
-        <!-- Section APK Disabled -->
-        <div class="p-4 rounded-xl bg-slate-950/50 border border-slate-800/80 opacity-50 space-y-1 pointer-events-none">
-          <div class="flex items-center justify-between">
-            <span class="text-xs font-semibold text-slate-400"><i class="fa-solid fa-mobile-screen mr-2"></i>Carica file APK Android / App iOS</span>
-            <span class="px-2 py-0.5 rounded text-[10px] font-bold bg-amber-950 text-amber-400 border border-amber-800">In Arrivo</span>
-          </div>
-        </div>
-      </div>
-
-      <button type="submit" id="btnGenerate" class="w-full py-3.5 bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white font-bold rounded-xl shadow-lg transition flex items-center justify-center gap-2">
-        <i class="fa-solid fa-wand-magic-sparkles"></i> Genera Scheda con IA
-      </button>
-    </form>
-
-    <!-- Preview & Publish Section -->
-    <div id="previewCard" class="hidden p-6 rounded-2xl bg-slate-900 border border-slate-800 space-y-6">
-      <div class="border-b border-slate-800 pb-3 flex justify-between items-center">
-        <h2 class="text-lg font-bold text-slate-100 flex items-center gap-2">
-          <i class="fa-solid fa-pen-to-square text-cyan-400"></i> 3. Anteprima & Modifica Manuale
-        </h2>
-        <span class="text-xs text-emerald-400 bg-emerald-950 border border-emerald-800 px-3 py-1 rounded-full font-semibold">Generato con successo</span>
-      </div>
-
-      <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs">
-        <div>
-          <label class="block text-slate-400 mb-1">Nome App</label>
-          <input id="pNome" type="text" class="w-full p-2.5 bg-slate-950 border border-slate-800 rounded-lg text-slate-100" />
-        </div>
-        <div>
-          <label class="block text-slate-400 mb-1">Categoria</label>
-          <input id="pCategoria" type="text" class="w-full p-2.5 bg-slate-950 border border-slate-800 rounded-lg text-slate-100" />
-        </div>
-        <div>
-          <label class="block text-slate-400 mb-1">Tipologia</label>
-          <input id="pTipologia" type="text" class="w-full p-2.5 bg-slate-950 border border-slate-800 rounded-lg text-slate-100" />
-        </div>
-        <div>
-          <label class="block text-slate-400 mb-1">Link App</label>
-          <input id="pLink" type="text" class="w-full p-2.5 bg-slate-950 border border-slate-800 rounded-lg text-slate-100 font-mono" />
-        </div>
-        <div class="md:col-span-2">
-          <label class="block text-slate-400 mb-1">Descrizione Breve (max 120 char)</label>
-          <input id="pDescBreve" type="text" class="w-full p-2.5 bg-slate-950 border border-slate-800 rounded-lg text-slate-100" />
-        </div>
-        <div class="md:col-span-2">
-          <label class="block text-slate-400 mb-1">Descrizione Dettagliata</label>
-          <textarea id="pDescDett" rows="3" class="w-full p-2.5 bg-slate-950 border border-slate-800 rounded-lg text-slate-100"></textarea>
-        </div>
-        <div>
-          <label class="block text-slate-400 mb-1">Requisiti</label>
-          <input id="pRequisiti" type="text" class="w-full p-2.5 bg-slate-950 border border-slate-800 rounded-lg text-slate-100" />
-        </div>
-        <div>
-          <label class="block text-slate-400 mb-1">Specifiche Piattaforma</label>
-          <input id="pPiattaforma" type="text" class="w-full p-2.5 bg-slate-950 border border-slate-800 rounded-lg text-slate-100" />
-        </div>
-      </div>
-
-      <div class="pt-4 border-t border-slate-800 flex justify-end">
-        <button id="btnPublish" onclick="publishToGitHub()" class="px-6 py-3 bg-emerald-600 hover:bg-emerald-500 text-white font-bold rounded-xl shadow-lg transition flex items-center gap-2">
-          <i class="fa-solid fa-cloud-arrow-up"></i> Pubblica su GitHub
-        </button>
-      </div>
+    <!-- Generator -->
+    <div class="bg-slate-900 p-6 rounded-2xl border border-slate-800 space-y-4">
+      <h2 class="text-lg font-bold">2. URL Web App</h2>
+      <input id="appUrl" type="url" placeholder="https://mia-app.example.com" class="w-full bg-slate-950 border border-slate-800 p-3 rounded-xl text-sm">
+      <button onclick="generateWithAI()" class="w-full py-3 bg-purple-600 hover:bg-purple-500 font-bold rounded-xl">Genera Scheda con IA</button>
     </div>
+
+    <!-- Preview & Publish -->
+    <div id="previewBox" class="bg-slate-900 p-6 rounded-2xl border border-slate-800 space-y-4 hidden">
+      <h2 class="text-lg font-bold text-emerald-400">3. Anteprima & Pubblicazione</h2>
+      <div id="previewData" class="text-xs space-y-2 font-mono bg-slate-950 p-4 rounded-xl border border-slate-800"></div>
+      <button onclick="publishToGitHub()" class="w-full py-3 bg-emerald-600 hover:bg-emerald-500 font-bold rounded-xl">Pubblica su GitHub</button>
+    </div>
+
+    <div id="status" class="p-4 rounded-xl border border-slate-800 text-sm hidden"></div>
   </div>
 
   <script>
-    const STORAGE_KEY = 'vetrina_admin_credentials_v1';
     let currentApp = null;
 
-    // Load credentials from LocalStorage
-    window.addEventListener('DOMContentLoaded', () => {
-      const saved = localStorage.getItem(STORAGE_KEY);
-      if (saved) {
-        try {
-          const creds = JSON.parse(saved);
-          document.getElementById('geminiApiKey').value = creds.geminiApiKey || '';
-          document.getElementById('githubToken').value = creds.githubToken || '';
-          document.getElementById('githubRepo').value = creds.githubRepo || '';
-        } catch(e){}
+    async function generateWithAI() {
+      const url = document.getElementById('appUrl').value;
+      const apiKey = document.getElementById('geminiKey').value;
+      if (!url) return alert('Inserisci l'URL');
+
+      showStatus('Generazione scheda con Gemini AI...', 'info');
+      try {
+        const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`;
+        const prompt = `Dato l'URL ${url}, genera JSON: {"nome":"","categoria":"","tipologia":"","descrizioneBreve":"","descrizioneDettagliata":"","requisiti":"","specifichePiattaforma":""}`;
+        
+        const res = await fetch(endpoint, {
+          method: 'POST',
+          headers: {'Content-Type': 'application/json'},
+          body: JSON.stringify({ contents: [{ parts: [{ text: prompt }] }] })
+        });
+        const data = await res.json();
+        const bt = String.fromCharCode(96);
+        const text = data.candidates[0].content.parts[0].text.replace(new RegExp(bt + bt + bt + 'json', 'g'), '').replace(new RegExp(bt + bt + bt, 'g'), '').trim();
+        const parsed = JSON.parse(text);
+
+        currentApp = {
+          id: Date.now().toString(),
+          ...parsed,
+          schermate: ["https://images.unsplash.com/photo-1551288049-bebda4e38f71?auto=format&fit=crop&w=1200&q=80"],
+          linkApp: url
+        };
+
+        document.getElementById('previewData').innerText = JSON.stringify(currentApp, null, 2);
+        document.getElementById('previewBox').classList.remove('hidden');
+        showStatus('Scheda generata con successo!', 'success');
+      } catch(e) {
+        showStatus('Errore generazione: ' + e.message, 'error');
       }
-    });
-
-    // Save Creds on change
-    ['geminiApiKey', 'githubToken', 'githubRepo'].forEach(id => {
-      document.getElementById(id).addEventListener('input', () => {
-        if(document.getElementById('saveCreds').checked) {
-          localStorage.setItem(STORAGE_KEY, JSON.stringify({
-            geminiApiKey: document.getElementById('geminiApiKey').value,
-            githubToken: document.getElementById('githubToken').value,
-            githubRepo: document.getElementById('githubRepo').value
-          }));
-        }
-      });
-    });
-
-    function showAlert(msg, type) {
-      const box = document.getElementById('statusAlert');
-      box.className = `p-4 rounded-xl border text-sm leading-relaxed ${
-        type === 'success' ? 'bg-emerald-950 border-emerald-800 text-emerald-200' :
-        type === 'error' ? 'bg-rose-950 border-rose-800 text-rose-200' :
-        'bg-cyan-950 border-cyan-800 text-cyan-200'
-      }`;
-      box.innerHTML = msg;
-      box.classList.remove('hidden');
     }
 
-    // AI Generation Handler
-    document.getElementById('aiForm').addEventListener('submit', async (e) => {
-      e.preventDefault();
-      const appUrl = document.getElementById('appUrl').value.trim();
-      const apiKey = document.getElementById('geminiApiKey').value.trim();
-      const extra = document.getElementById('extraContext').value.trim();
-
-      const screen1 = document.getElementById('screen1').value.trim() || 'https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?auto=format&fit=crop&w=1200&q=80';
-      const screen2 = document.getElementById('screen2').value.trim() || 'https://images.unsplash.com/photo-1551288049-bebda4e38f71?auto=format&fit=crop&w=1200&q=80';
-      const screen3 = document.getElementById('screen3').value.trim() || 'https://images.unsplash.com/photo-1460925895917-afdab827c52f?auto=format&fit=crop&w=1200&q=80';
-
-      showAlert('<i class="fa-solid fa-spinner fa-spin mr-2"></i>Generazione scheda con Gemini AI in corso...', 'info');
-
-      let domain = appUrl.replace(/^https?:\/\//, '').replace(/^www\./, '').split('/')[0] || 'App Web';
-
-      if (apiKey) {
-        try {
-          const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`;
-          const prompt = `Analizza questa Web App: ${appUrl}. Context: ${extra}. Genera JSON con: {"nome":"","categoria":"Produttività|AI Tools|Developer|SaaS","tipologia":"SaaS|Micro-tool|Prompt Interface|Web Utility","descrizioneBreve":"max 120 caratteri","descrizioneDettagliata":"","requisiti":"Browser moderno","specifichePiattaforma":"Web Desktop e Mobile"}`;
-          
-          const response = await fetch(endpoint, {
-            method: 'POST',
-            headers: {'Content-Type': 'application/json'},
-            body: JSON.stringify({ contents: [{ parts: [{ text: prompt }] }] })
-          });
-          const resData = await response.json();
-          const rawText = resData.candidates?.[0]?.content?.parts?.[0]?.text || '';
-          const cleanedText = rawText.replace(/```json/g, '').replace(/```/g, '').trim();
-          const parsed = JSON.parse(cleanedText);
-
-          currentApp = {
-            id: Date.now().toString(),
-            nome: parsed.nome || domain,
-            categoria: parsed.categoria || 'AI Tools',
-            tipologia: parsed.tipologia || 'SaaS',
-            descrizioneBreve: parsed.descrizioneBreve || 'Applicazione Web moderna.',
-            descrizioneDettagliata: parsed.descrizioneDettagliata || 'Applicazione ad alte prestazioni ottimizzata per il web.',
-            requisiti: parsed.requisiti || 'Browser moderno',
-            specifichePiattaforma: parsed.specifichePiattaforma || 'Web Desktop & Mobile',
-            schermate: [screen1, screen2, screen3],
-            linkApp: appUrl,
-            tags: ['Web App', 'Tech']
-          };
-        } catch(err) {
-          console.warn('Fallback a scheda strutturata:', err);
-          currentApp = createFallbackApp(appUrl, domain, [screen1, screen2, screen3]);
-        }
-      } else {
-        currentApp = createFallbackApp(appUrl, domain, [screen1, screen2, screen3]);
-      }
-
-      // Populate preview form
-      document.getElementById('pNome').value = currentApp.nome;
-      document.getElementById('pCategoria').value = currentApp.categoria;
-      document.getElementById('pTipologia').value = currentApp.tipologia;
-      document.getElementById('pLink').value = currentApp.linkApp;
-      document.getElementById('pDescBreve').value = currentApp.descrizioneBreve;
-      document.getElementById('pDescDett').value = currentApp.descrizioneDettagliata;
-      document.getElementById('pRequisiti').value = currentApp.requisiti;
-      document.getElementById('pPiattaforma').value = currentApp.specifichePiattaforma;
-
-      document.getElementById('previewCard').classList.remove('hidden');
-      showAlert('<i class="fa-solid fa-circle-check text-emerald-400 mr-2"></i>Scheda generata con successo! Verifica i campi e clicca "Pubblica su GitHub".', 'success');
-    });
-
-    function createFallbackApp(url, domain, screens) {
-      return {
-        id: Date.now().toString(),
-        nome: domain.charAt(0).toUpperCase() + domain.slice(1),
-        categoria: 'AI Tools',
-        tipologia: 'Web Utility',
-        descrizioneBreve: 'Piattaforma web moderna ed efficiente.',
-        descrizioneDettagliata: 'Applicazione web ottimizzata per la massima produttività da qualsiasi browser moderno.',
-        requisiti: 'Browser moderno (Chrome, Firefox, Safari, Edge)',
-        specifichePiattaforma: 'Web Desktop & Mobile',
-        schermate: screens,
-        linkApp: url,
-        tags: ['Web', 'Productivity']
-      };
-    }
-
-    // GitHub Commit Handler
     async function publishToGitHub() {
-      const repo = document.getElementById('githubRepo').value.trim();
-      const token = document.getElementById('githubToken').value.trim();
+      const repo = document.getElementById('githubRepo').value;
+      const token = document.getElementById('githubToken').value;
+      if (!repo || !token || !currentApp) return alert('Token e Repo richiesti');
 
-      if (!repo || !token) {
-        return showAlert('<i class="fa-solid fa-triangle-exclamation mr-2"></i>Token GitHub (PAT) e repository (username/repo) sono obbligatori.', 'error');
-      }
-
-      // Read edited fields
-      currentApp.nome = document.getElementById('pNome').value;
-      currentApp.categoria = document.getElementById('pCategoria').value;
-      currentApp.tipologia = document.getElementById('pTipologia').value;
-      currentApp.linkApp = document.getElementById('pLink').value;
-      currentApp.descrizioneBreve = document.getElementById('pDescBreve').value;
-      currentApp.descrizioneDettagliata = document.getElementById('pDescDett').value;
-      currentApp.requisiti = document.getElementById('pRequisiti').value;
-      currentApp.specifichePiattaforma = document.getElementById('pPiattaforma').value;
-
-      showAlert('<i class="fa-solid fa-spinner fa-spin mr-2"></i>Download file data/apps.json ed invio commit su GitHub...', 'info');
-
+      showStatus('Pubblicazione su GitHub in corso...', 'info');
       try {
         const [owner, name] = repo.split('/');
         const getUrl = `https://api.github.com/repos/${owner}/${name}/contents/data/apps.json`;
-
-        const getRes = await fetch(getUrl, {
-          headers: { Authorization: `Bearer ${token}`, Accept: 'application/vnd.github.v3+json' }
-        });
-
+        
+        const getRes = await fetch(getUrl, { headers: { Authorization: `Bearer ${token}` } });
         let apps = [];
         let sha = null;
-
         if (getRes.ok) {
           const fileData = await getRes.json();
           sha = fileData.sha;
-          const decodedText = decodeURIComponent(escape(atob(fileData.content.replace(/\n/g, ''))));
-          apps = JSON.parse(decodedText);
+          apps = JSON.parse(atob(fileData.content));
         }
 
-        apps = [currentApp, ...apps.filter(a => String(a.id) !== String(currentApp.id))];
-
-        const jsonString = JSON.stringify(apps, null, 2);
-        const contentBase64 = btoa(unescape(encodeURIComponent(jsonString)));
+        apps.unshift(currentApp);
+        const contentBase64 = btoa(unescape(encodeURIComponent(JSON.stringify(apps, null, 2))));
 
         const putRes = await fetch(getUrl, {
           method: 'PUT',
-          headers: {
-            Authorization: `Bearer ${token}`,
-            Accept: 'application/vnd.github.v3+json',
-            'Content-Type': 'application/json'
-          },
-          body: JSON.stringify({
-            message: `feat(portfolio): aggiunta app "${currentApp.nome}" [skip ci]`,
-            content: contentBase64,
-            sha: sha
-          })
+          headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
+          body: JSON.stringify({ message: `add app ${currentApp.nome}`, content: contentBase64, sha })
         });
 
-        if (!putRes.ok) {
-          const errData = await putRes.json().catch(() => ({}));
-          throw new Error(errData.message || 'Errore durante il commit su GitHub.');
+        if (putRes.ok) {
+          showStatus('App pubblicata! Il sito si aggiornerà su GitHub Pages entro 1 minuto.', 'success');
+        } else {
+          throw new Error('Errore durante il commit');
         }
-
-        showAlert('<i class="fa-solid fa-circle-check text-emerald-400 mr-2"></i><strong>App pubblicata!</strong> Il sito si aggiornerà su GitHub Pages entro 1 minuto.', 'success');
-      } catch(err) {
-        showAlert(`<i class="fa-solid fa-circle-xmark text-rose-400 mr-2"></i>Errore di pubblicazione: ${err.message}`, 'error');
+      } catch(e) {
+        showStatus('Errore pubblicazione: ' + e.message, 'error');
       }
+    }
+
+    function showStatus(msg, type) {
+      const el = document.getElementById('status');
+      el.innerText = msg;
+      el.className = `p-4 rounded-xl text-sm border ${type === 'success' ? 'bg-emerald-950 text-emerald-200 border-emerald-800' : 'bg-rose-950 text-rose-200 border-rose-800'}`;
+      el.classList.remove('hidden');
     }
   </script>
 </body>
