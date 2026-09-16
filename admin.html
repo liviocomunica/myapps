@@ -1,6 +1,434 @@
 <!DOCTYPE html>
 <html lang="it" class="dark">
 <head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Pannello Admin - Vetrina Portfolio & AI Gemini</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            brand: { 500: '#06b6d4', 600: '#0891b2' }
+          }
+        }
+      }
+    }
+  </script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+</head>
+<body class="bg-slate-950 text-slate-100 min-h-screen font-sans antialiased p-4 sm:p-8">
+
+  <div class="max-w-4xl mx-auto space-y-8 pb-16">
+    <!-- Header -->
+    <header class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 p-6 rounded-2xl bg-slate-900 border border-slate-800">
+      <div>
+        <div class="flex items-center gap-2 text-cyan-400 text-xs font-semibold uppercase tracking-wider mb-1">
+          <i class="fa-solid fa-lock"></i> Pannello Amministrazione Portfolio
+        </div>
+        <h1 class="text-2xl sm:text-3xl font-bold text-white">Generatore Schede & Commit GitHub</h1>
+      </div>
+      <a href="index.html" class="inline-flex items-center gap-2 px-4 py-2 bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 rounded-xl text-xs font-semibold transition">
+        <i class="fa-solid fa-arrow-left"></i> Torna alla Vetrina
+      </a>
+    </header>
+
+    <!-- Global Alert Banner -->
+    <div id="statusAlert" class="hidden p-4 rounded-xl border text-sm leading-relaxed transition-all"></div>
+
+    <!-- Credenziali -->
+    <div class="p-6 rounded-2xl bg-slate-900 border border-slate-800 space-y-4">
+      <div class="flex items-center justify-between border-b border-slate-800 pb-3">
+        <h2 class="text-lg font-bold text-slate-100 flex items-center gap-2">
+          <i class="fa-solid fa-key text-cyan-400"></i> 1. Credenziali & Token API
+        </h2>
+        <span class="text-xs text-slate-400">Salvate in LocalStorage</span>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div>
+          <label class="block text-xs font-semibold text-slate-300 mb-1">
+            Gemini API Key <a href="https://aistudio.google.com/app/apikey" target="_blank" class="text-cyan-400 underline hover:text-cyan-300">(Ottieni Key)</a>
+          </label>
+          <input id="geminiApiKey" type="password" placeholder="AIzaSy..." class="w-full px-3.5 py-2.5 bg-slate-950 border border-slate-800 rounded-xl text-sm font-mono text-slate-100 focus:outline-none focus:border-cyan-500" />
+        </div>
+
+        <div>
+          <label class="block text-xs font-semibold text-slate-300 mb-1">
+            GitHub Token (PAT) <a href="https://github.com/settings/tokens" target="_blank" class="text-cyan-400 underline hover:text-cyan-300">(Crea Token)</a>
+          </label>
+          <input id="githubToken" type="password" placeholder="ghp_..." class="w-full px-3.5 py-2.5 bg-slate-950 border border-slate-800 rounded-xl text-sm font-mono text-slate-100 focus:outline-none focus:border-cyan-500" />
+        </div>
+
+        <div>
+          <label class="block text-xs font-semibold text-slate-300 mb-1">Nome Utente / Repo GitHub</label>
+          <input id="githubRepo" type="text" placeholder="tuonome/tuo-repo" class="w-full px-3.5 py-2.5 bg-slate-950 border border-slate-800 rounded-xl text-sm font-mono text-slate-100 focus:outline-none focus:border-cyan-500" />
+        </div>
+      </div>
+
+      <div class="flex items-center justify-between pt-2">
+        <div class="flex items-center gap-2">
+          <input type="checkbox" id="saveCreds" checked class="rounded bg-slate-950 border-slate-800 text-cyan-500" />
+          <label for="saveCreds" class="text-xs text-slate-400 cursor-pointer">Salva automaticamente nel browser</label>
+        </div>
+        <button type="button" onclick="saveCredentialsExplicitly()" class="px-4 py-2 bg-slate-800 hover:bg-slate-700 text-cyan-400 border border-slate-700 rounded-xl text-xs font-semibold transition flex items-center gap-1.5">
+          <i class="fa-solid fa-floppy-disk"></i> Salva Credenziali
+        </button>
+      </div>
+    </div>
+
+    <!-- Generazione Scheda IA -->
+    <form id="aiForm" class="p-6 rounded-2xl bg-slate-900 border border-slate-800 space-y-4">
+      <div class="border-b border-slate-800 pb-3">
+        <h2 class="text-lg font-bold text-slate-100 flex items-center gap-2">
+          <i class="fa-solid fa-wand-magic-sparkles text-purple-400"></i> 2. Inserimento Web App & Generatore Gemini IA
+        </h2>
+      </div>
+
+      <div class="space-y-4">
+        <div>
+          <label class="block text-xs font-semibold text-slate-300 mb-1">URL della Web App *</label>
+          <input id="appUrl" type="url" required placeholder="https://mia-app.example.com" class="w-full px-4 py-3 bg-slate-950 border border-slate-800 rounded-xl text-sm font-mono text-slate-100 focus:outline-none focus:border-purple-500" />
+        </div>
+
+        <div>
+          <label class="block text-xs font-semibold text-slate-300 mb-1">Note / Contesto Aggiuntivo (Opzionale)</label>
+          <input id="extraContext" type="text" placeholder="es. Piattaforma per ingegneria di prompt con IA per sviluppatori" class="w-full px-3.5 py-2.5 bg-slate-950 border border-slate-800 rounded-xl text-xs text-slate-100 focus:outline-none focus:border-purple-500" />
+        </div>
+
+        <div class="space-y-2">
+          <label class="block text-xs font-semibold text-slate-300">Link Schermate (Opzionali - generate in automatico se vuote)</label>
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
+            <input id="screen1" type="url" placeholder="https://.../schermata1.jpg" class="px-3 py-2 bg-slate-950 border border-slate-800 rounded-lg text-xs text-slate-200" />
+            <input id="screen2" type="url" placeholder="https://.../schermata2.jpg" class="px-3 py-2 bg-slate-950 border border-slate-800 rounded-lg text-xs text-slate-200" />
+            <input id="screen3" type="url" placeholder="https://.../schermata3.jpg" class="px-3 py-2 bg-slate-950 border border-slate-800 rounded-lg text-xs text-slate-200" />
+          </div>
+        </div>
+
+        <!-- Section APK Disabled -->
+        <div class="p-4 rounded-xl bg-slate-950/50 border border-slate-800/80 opacity-50 space-y-1 pointer-events-none">
+          <div class="flex items-center justify-between">
+            <span class="text-xs font-semibold text-slate-400"><i class="fa-solid fa-mobile-screen mr-2"></i>Carica file APK Android / App iOS</span>
+            <span class="px-2 py-0.5 rounded text-[10px] font-bold bg-amber-950 text-amber-400 border border-amber-800">In Arrivo</span>
+          </div>
+        </div>
+      </div>
+
+      <button type="submit" id="btnGenerate" class="w-full py-3.5 bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white font-bold rounded-xl shadow-lg transition flex items-center justify-center gap-2">
+        <i class="fa-solid fa-wand-magic-sparkles"></i> Genera Scheda con IA
+      </button>
+    </form>
+
+    <!-- Preview & Publish Section -->
+    <div id="previewCard" class="hidden p-6 rounded-2xl bg-slate-900 border border-slate-800 space-y-6">
+      <div class="border-b border-slate-800 pb-3 flex justify-between items-center">
+        <h2 class="text-lg font-bold text-slate-100 flex items-center gap-2">
+          <i class="fa-solid fa-pen-to-square text-cyan-400"></i> 3. Anteprima & Modifica Manuale
+        </h2>
+        <span class="text-xs text-emerald-400 bg-emerald-950 border border-emerald-800 px-3 py-1 rounded-full font-semibold">Generato con successo</span>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs">
+        <div>
+          <label class="block text-slate-400 mb-1">Nome App</label>
+          <input id="pNome" type="text" class="w-full p-2.5 bg-slate-950 border border-slate-800 rounded-lg text-slate-100" />
+        </div>
+        <div>
+          <label class="block text-slate-400 mb-1">Categoria</label>
+          <input id="pCategoria" type="text" class="w-full p-2.5 bg-slate-950 border border-slate-800 rounded-lg text-slate-100" />
+        </div>
+        <div>
+          <label class="block text-slate-400 mb-1">Tipologia</label>
+          <input id="pTipologia" type="text" class="w-full p-2.5 bg-slate-950 border border-slate-800 rounded-lg text-slate-100" />
+        </div>
+        <div>
+          <label class="block text-slate-400 mb-1">Link App</label>
+          <input id="pLink" type="text" class="w-full p-2.5 bg-slate-950 border border-slate-800 rounded-lg text-slate-100 font-mono" />
+        </div>
+        <div class="md:col-span-2">
+          <label class="block text-slate-400 mb-1">Descrizione Breve (max 120 char)</label>
+          <input id="pDescBreve" type="text" class="w-full p-2.5 bg-slate-950 border border-slate-800 rounded-lg text-slate-100" />
+        </div>
+        <div class="md:col-span-2">
+          <label class="block text-slate-400 mb-1">Descrizione Dettagliata</label>
+          <textarea id="pDescDett" rows="4" class="w-full p-2.5 bg-slate-950 border border-slate-800 rounded-lg text-slate-100"></textarea>
+        </div>
+        <div>
+          <label class="block text-slate-400 mb-1">Requisiti</label>
+          <input id="pRequisiti" type="text" class="w-full p-2.5 bg-slate-950 border border-slate-800 rounded-lg text-slate-100" />
+        </div>
+        <div>
+          <label class="block text-slate-400 mb-1">Specifiche Piattaforma</label>
+          <input id="pPiattaforma" type="text" class="w-full p-2.5 bg-slate-950 border border-slate-800 rounded-lg text-slate-100" />
+        </div>
+      </div>
+
+      <div class="pt-4 border-t border-slate-800 flex justify-end">
+        <button id="btnPublish" onclick="publishToGitHub()" class="px-6 py-3 bg-emerald-600 hover:bg-emerald-500 text-white font-bold rounded-xl shadow-lg transition flex items-center gap-2">
+          <i class="fa-solid fa-cloud-arrow-up"></i> Pubblica su GitHub
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const STORAGE_KEY = 'vetrina_admin_credentials_v1';
+    let currentApp = null;
+
+    // Load credentials from LocalStorage
+    function loadCredentials() {
+      const saved = localStorage.getItem(STORAGE_KEY);
+      if (saved) {
+        try {
+          const creds = JSON.parse(saved);
+          if (creds.geminiApiKey) document.getElementById('geminiApiKey').value = creds.geminiApiKey;
+          if (creds.githubToken) document.getElementById('githubToken').value = creds.githubToken;
+          if (creds.githubRepo) document.getElementById('githubRepo').value = creds.githubRepo;
+        } catch(e){ console.warn('Errore lettura LocalStorage:', e); }
+      }
+    }
+
+    function saveCredentialsExplicitly() {
+      const gKey = document.getElementById('geminiApiKey').value.trim();
+      const gToken = document.getElementById('githubToken').value.trim();
+      const gRepo = document.getElementById('githubRepo').value.trim();
+
+      const credsObj = { geminiApiKey: gKey, githubToken: gToken, githubRepo: gRepo };
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(credsObj));
+      showAlert('<i class="fa-solid fa-circle-check text-emerald-400 mr-2"></i>Credenziali salvate correttamente nel browser!', 'success');
+    }
+
+    // Auto-save on change if checkbox is enabled
+    function autoSaveOnInput() {
+      if (document.getElementById('saveCreds').checked) {
+        const credsObj = {
+          geminiApiKey: document.getElementById('geminiApiKey').value.trim(),
+          githubToken: document.getElementById('githubToken').value.trim(),
+          githubRepo: document.getElementById('githubRepo').value.trim()
+        };
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(credsObj));
+      }
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+      loadCredentials();
+      ['geminiApiKey', 'githubToken', 'githubRepo'].forEach(id => {
+        const inputEl = document.getElementById(id);
+        if (inputEl) {
+          inputEl.addEventListener('input', autoSaveOnInput);
+        }
+      });
+    });
+
+    function showAlert(msg, type) {
+      const box = document.getElementById('statusAlert');
+      box.className = `p-4 rounded-xl border text-sm leading-relaxed ${
+        type === 'success' ? 'bg-emerald-950 border-emerald-800 text-emerald-200' :
+        type === 'error' ? 'bg-rose-950 border-rose-800 text-rose-200' :
+        'bg-cyan-950 border-cyan-800 text-cyan-200'
+      }`;
+      box.innerHTML = msg;
+      box.classList.remove('hidden');
+      box.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }
+
+    // AI Generation Handler
+    document.getElementById('aiForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const appUrl = document.getElementById('appUrl').value.trim();
+      const apiKey = document.getElementById('geminiApiKey').value.trim();
+      const extra = document.getElementById('extraContext').value.trim();
+
+      if (!appUrl) {
+        return showAlert('<i class="fa-solid fa-triangle-exclamation mr-2"></i>Inserisci l\'URL del sito web per procedere.', 'error');
+      }
+
+      // Explicit auto-save credentials on generation click
+      autoSaveOnInput();
+
+      showAlert('<i class="fa-solid fa-spinner fa-spin mr-2"></i>Ispezione sito ed estrazione meta tag con Gemini AI...', 'info');
+
+      const targetUrl = appUrl.startsWith('http') ? appUrl : `https://${appUrl}`;
+      const domain = targetUrl.replace(/^https?:\/\//, '').replace(/^www\./, '').split('/')[0] || 'App Web';
+
+      // Real screenshot assets
+      const liveScreenshot1 = `https://image.thum.io/get/width/1200/crop/750/${targetUrl}`;
+      const liveScreenshot2 = `https://api.microlink.io/?url=${encodeURIComponent(targetUrl)}&screenshot=true&embed=screenshot.url`;
+      const liveScreenshot3 = `https://images.unsplash.com/photo-1551288049-bebda4e38f71?auto=format&fit=crop&w=1200&q=80`;
+
+      let metaTitle = '';
+      let metaDesc = '';
+
+      // Safe metadata scraper with Controller Timeout (3.5 seconds)
+      try {
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 3500);
+        const metaRes = await fetch(`https://api.microlink.io/?url=${encodeURIComponent(targetUrl)}`, { signal: controller.signal });
+        clearTimeout(timeoutId);
+        if (metaRes.ok) {
+          const metaJson = await metaRes.json();
+          metaTitle = metaJson.data?.title || '';
+          metaDesc = metaJson.data?.description || '';
+        }
+      } catch(e) {
+        console.warn('Scraping fallback activated:', e);
+      }
+
+      const screen1 = document.getElementById('screen1').value.trim() || liveScreenshot1;
+      const screen2 = document.getElementById('screen2').value.trim() || liveScreenshot2;
+      const screen3 = document.getElementById('screen3').value.trim() || liveScreenshot3;
+
+      if (apiKey) {
+        try {
+          const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`;
+          const prompt = `Sei un esperto Product Manager. Analizza la seguente Web App: URL: ${targetUrl}. Titolo HTML rilevato: "${metaTitle}". Descrizione meta HTML rilevata: "${metaDesc}". Informazioni inserite dall\'amministratore: "${extra}". Genera un oggetto JSON in italiano con la seguente struttura esatta:
+{
+  "nome": "Nome dell\'App",
+  "categoria": "Scegli una tra: AI Tools, Produttività, Developer, SaaS, Creatività, Web Utility",
+  "tipologia": "Scegli una tra: SaaS, Micro-tool, Prompt Interface, Web Utility, PWA",
+  "descrizioneBreve": "Descrizione accattivante di massimo 120 caratteri",
+  "descrizioneDettagliata": "Descrizione approfondita di 2-3 paragrafi che illustra caratteristiche, utilità e vantaggi competitivi",
+  "requisiti": "es. Connessione internet, Browser moderno",
+  "specifichePiattaforma": "Web Desktop & Mobile, Responsive UI"
+}
+Rispondi esclusivamente con l\'oggetto JSON, escludendo blocchi di codice markdown (tipo ```json).`;
+          
+          const response = await fetch(endpoint, {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({ contents: [{ parts: [{ text: prompt }] }] })
+          });
+          const resData = await response.json();
+          const rawText = resData.candidates?.[0]?.content?.parts?.[0]?.text || '';
+          const cleanedText = rawText.replace(/```json/g, '').replace(/```/g, '').trim();
+          const parsed = JSON.parse(cleanedText);
+
+          currentApp = {
+            id: Date.now().toString(),
+            nome: parsed.nome || metaTitle || domain,
+            categoria: parsed.categoria || 'AI Tools',
+            tipologia: parsed.tipologia || 'SaaS',
+            descrizioneBreve: (parsed.descrizioneBreve || metaDesc || 'Applicazione Web moderna.').slice(0, 140),
+            descrizioneDettagliata: parsed.descrizioneDettagliata || metaDesc || 'Applicazione ad alte prestazioni ottimizzata per il web.',
+            requisiti: parsed.requisiti || 'Browser moderno, Connessione Internet',
+            specifichePiattaforma: parsed.specifichePiattaforma || 'Web Desktop & Mobile',
+            schermate: [screen1, screen2, screen3],
+            linkApp: targetUrl,
+            tags: ['Web App', 'Tech']
+          };
+        } catch(err) {
+          console.warn('Fallback a scheda strutturata:', err);
+          currentApp = createFallbackApp(targetUrl, domain, metaTitle, metaDesc, [screen1, screen2, screen3]);
+        }
+      } else {
+        currentApp = createFallbackApp(targetUrl, domain, metaTitle, metaDesc, [screen1, screen2, screen3]);
+      }
+
+      // Populate preview fields
+      document.getElementById('pNome').value = currentApp.nome;
+      document.getElementById('pCategoria').value = currentApp.categoria;
+      document.getElementById('pTipologia').value = currentApp.tipologia;
+      document.getElementById('pLink').value = currentApp.linkApp;
+      document.getElementById('pDescBreve').value = currentApp.descrizioneBreve;
+      document.getElementById('pDescDett').value = currentApp.descrizioneDettagliata;
+      document.getElementById('pRequisiti').value = currentApp.requisiti;
+      document.getElementById('pPiattaforma').value = currentApp.specifichePiattaforma;
+
+      document.getElementById('previewCard').classList.remove('hidden');
+      showAlert('<i class="fa-solid fa-circle-check text-emerald-400 mr-2"></i>Scheda generata con successo! Verifica i campi qui sotto e procedi al salvataggio.', 'success');
+    });
+
+    function createFallbackApp(url, domain, metaTitle, metaDesc, screens) {
+      return {
+        id: Date.now().toString(),
+        nome: metaTitle || (domain.charAt(0).toUpperCase() + domain.slice(1)),
+        categoria: 'AI Tools',
+        tipologia: 'Web Utility',
+        descrizioneBreve: (metaDesc || 'Piattaforma web moderna ed efficiente.').slice(0, 135),
+        descrizioneDettagliata: metaDesc || 'Applicazione web ad alte prestazioni ottimizzata per la massima produttività da qualsiasi browser moderno.',
+        requisiti: 'Browser moderno (Chrome, Firefox, Safari, Edge), Connessione Internet',
+        specifichePiattaforma: 'Web Desktop & Mobile, Responsive UI',
+        schermate: screens,
+        linkApp: url,
+        tags: ['Web', 'Productivity']
+      };
+    }
+
+    // GitHub Commit Handler
+    async function publishToGitHub() {
+      const repo = document.getElementById('githubRepo').value.trim();
+      const token = document.getElementById('githubToken').value.trim();
+
+      if (!repo || !token) {
+        return showAlert('<i class="fa-solid fa-triangle-exclamation mr-2"></i>Inserisci il Token GitHub (PAT) e il repository (username/repo) per procedere.', 'error');
+      }
+
+      // Read edited fields
+      currentApp.nome = document.getElementById('pNome').value.trim();
+      currentApp.categoria = document.getElementById('pCategoria').value.trim();
+      currentApp.tipologia = document.getElementById('pTipologia').value.trim();
+      currentApp.linkApp = document.getElementById('pLink').value.trim();
+      currentApp.descrizioneBreve = document.getElementById('pDescBreve').value.trim();
+      currentApp.descrizioneDettagliata = document.getElementById('pDescDett').value.trim();
+      currentApp.requisiti = document.getElementById('pRequisiti').value.trim();
+      currentApp.specifichePiattaforma = document.getElementById('pPiattaforma').value.trim();
+
+      showAlert('<i class="fa-solid fa-spinner fa-spin mr-2"></i>Scaricamento dataset ed aggiornamento su GitHub in corso...', 'info');
+
+      try {
+        const [owner, name] = repo.split('/');
+        const getUrl = `https://api.github.com/repos/${owner}/${name}/contents/data/apps.json`;
+
+        const getRes = await fetch(getUrl, {
+          headers: { Authorization: `Bearer ${token}`, Accept: 'application/vnd.github.v3+json' }
+        });
+
+        let apps = [];
+        let sha = null;
+
+        if (getRes.ok) {
+          const fileData = await getRes.json();
+          sha = fileData.sha;
+          const decodedText = decodeURIComponent(escape(atob(fileData.content.replace(/\n/g, ''))));
+          apps = JSON.parse(decodedText);
+        }
+
+        apps = [currentApp, ...apps.filter(a => String(a.id) !== String(currentApp.id))];
+
+        const jsonString = JSON.stringify(apps, null, 2);
+        const contentBase64 = btoa(unescape(encodeURIComponent(jsonString)));
+
+        const putRes = await fetch(getUrl, {
+          method: 'PUT',
+          headers: {
+            Authorization: `Bearer ${token}`,
+            Accept: 'application/vnd.github.v3+json',
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({
+            message: `feat(portfolio): aggiunta app "${currentApp.nome}" [skip ci]`,
+            content: contentBase64,
+            sha: sha
+          })
+        });
+
+        if (!putRes.ok) {
+          const errData = await putRes.json().catch(() => ({}));
+          throw new Error(errData.message || 'Errore di risposta dalle API GitHub.');
+        }
+
+        showAlert('<i class="fa-solid fa-circle-check text-emerald-400 mr-2"></i><strong>App pubblicata con successo!</strong> Il tuo portfolio su GitHub Pages si aggiornerà entro 1 minuto.', 'success');
+      } catch(err) {
+        showAlert(`<i class="fa-solid fa-circle-xmark text-rose-400 mr-2"></i>Errore di pubblicazione: ${err.message}`, 'error');
+      }
+    }
+  </script>
+</body>
+</html><!DOCTYPE html>
+<html lang="it" class="dark">
+<head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Pannello Admin - Vetrina Portfolio</title>
