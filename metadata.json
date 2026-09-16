@@ -1,0 +1,7 @@
+{
+  "name": "Vetrina Portfolio & Admin AI",
+  "description": "Vetrina portfolio dinamica per Web App con generatore schede Gemini AI e sincronizzazione GitHub Pages.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
+
